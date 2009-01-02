@@ -9,6 +9,10 @@ This driver is designed for use with DBI 0.4 and greater.
 
 This driver is licensed under the Apache License, Version 2.
 
+The official code repository is located on GitHub. The repository can be cloned with:
+
+   git://github.com/efarrar/dbd-sqlanywhere.git
+
 ==Making a Connection
 
 The following code is a sample database configuration object that connects
