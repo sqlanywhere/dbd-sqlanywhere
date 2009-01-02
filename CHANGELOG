@@ -1,0 +1,12 @@
+=CHANGE LOG
+
+=====0.1.1 -- 2008/11/06
+- Changed file permissions on archives
+- Changed archives to be specific to platform (.zip on windows, .tar.gz
+otherwise)
+- Removed the default rake task
+
+=====0.1.0 -- 2008/10/29
+- Initial Release
+- Wraps DBCAPI functionality
+- Tested against DBI 0.4

@@ -1,0 +1,129 @@
+=SQL Anywhere DBD Driver for Ruby-DBI
+
+This is a SQL Anywhere driver for Ruby DBI (http://ruby-dbi.rubyforge.org/). This driver requires the
+native SQL Anywhere Ruby driver. To get the native driver, use:
+
+   gem install sqlanywhere
+
+This driver is designed for use with DBI 0.4 and greater.
+
+This driver is licensed under the Apache License, Version 2.
+
+==Making a Connection
+
+The following code is a sample database configuration object that connects
+to a database called 'Test'.
+   
+  require 'dbi'
+  
+  DBI.connect('DBI:SQLAnywhere:Test') do | dbh |
+    if dbh.ping
+      print "Successfully Connected"
+    end
+  end
+
+The connection string takes the general form:
+
+  dbh = DBI.connect('DBI:SQLAnywhere:[DB_NAME]', [USER_NAME], [PASSWORD], [OPTIONS])
+
+where,
+  [DB_NAME] is the name of the database you wish to connect to
+  [USER_NAME] is the username
+  [PASSWORD] is the corresponding password for the username
+
+  [OPTIONS] is a hash of additional options for the connection. 
+
+For example, to start with named connection called 'ruby_dbi' you can use:
+ 
+  dbh = DBI.connect('DBI:SQLAnywhere:Test', 'dba', 'sql', {:CON => "ruby_dbi"})
+
+==Running Test Suite
+
+For information on running the Ruby/DBI DBD Tests, please see
+
+   test/DBD_TESTS
+
+==Driver-Specific Features
+
+At the time of this writing, there was no standard way to handle INOUT and OUT parameters
+from stored procedures in DBI. 
+
+When binding to an OUT parameter, you must bind a hash that contains a key called
+:name. This :name will be used to retrieve the OUT value after execution. If the
+OUT column is of string or binary type, you must also pass a key called :length 
+with the expected maximum length of the OUT parameter.
+
+In the case of an INOUT parameter, the :name and :length keys are the same as for
+OUT parameters, but an additional :value parameter holds the value to be passed
+into the stored procedure.
+
+After execution, you can use the statement-specific function :bound_param
+to retrieve the output value using the :name supplied at binding time.
+
+===Example of using OUT and INOUT parameters
+      
+   # The result that should be printed to console is:
+   #  Complete string is PREFIX-some_string-SUFFIX and is 25 chars long
+   #  Complete string is PREFIXPREFIX-some_string-SUFFIXSUFFIX and is 37 chars long
+
+   require 'dbi'
+
+   begin
+   DBI.connect("DBI:SQLAnywhere:test") do |dbh|
+
+   sql = <<SQL
+   IF EXISTS(SELECT * FROM SYS.SYSPROCEDURE where proc_name = 'foo') THEN
+       DROP PROCEDURE foo;
+   END IF
+   SQL
+
+      dbh.do(sql);
+
+   sql = <<SQL
+   create procedure foo 
+   ( IN prefix char(10),
+     INOUT buffer varchar(256),
+     OUT str_len int,
+     IN suffix char(10) 
+   )
+   begin                                       
+       set buffer = prefix || buffer || suffix;
+       select length( buffer ) into str_len;   
+   end                                         
+   SQL
+
+      dbh.do(sql);
+      
+      buffer = "-some_string-"
+      prefix = "PREFIX"
+      
+      # preparing the statement
+      sth = dbh.prepare("call foo( ?, ?, ?, ? )")
+
+      # Binding buffer column as :buf, and str_len column as :len
+      # Note that we must supply a :value for :buf since it is an INOUT
+      # And we must supply a :length for :buf since it is a string column
+      sth.execute( prefix, {:name => :buf, :value => buffer, :length => 255}, {:name => :len}, "SUFFIX")
+
+      # Retrieve the OUT value from buffer
+      new_buffer = sth.func(:bound_param, :buf)
+
+      # Retrieve the OUT value from str_len
+      length = sth.func(:bound_param, :len)
+      puts "Complete string is #{new_buffer} and is #{length} chars long"
+
+      # Add the results back into the string, and re-execute
+      sth.execute("PREFIX", {:name => :buf, :value => new_buffer, :length => 255}, {:name => :len}, "SUFFIX")
+      new_buffer = sth.func(:bound_param, :buf)
+      length = sth.func(:bound_param, :len)
+      puts "Complete string is #{new_buffer} and is #{length} chars long"
+   end
+
+   rescue DBI::DatabaseError => e
+    puts "An error occurred"
+    puts "Error code: #{e.err}"
+    puts "Error message: #{e.errstr}"
+    puts "Error SQLSTATE: #{e.state}"
+   ensure
+       DBI.disconnect_all
+   end
