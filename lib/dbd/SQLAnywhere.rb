@@ -38,7 +38,7 @@ module DBI
 module DBD
 module SQLAnywhere
 
-   VERSION = "0.1.1"
+   VERSION = "0.1.2"
 
    def self.driver_name
       "SQLAnywhere"

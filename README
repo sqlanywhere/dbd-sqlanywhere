@@ -26,20 +26,37 @@ to a database called 'Test'.
     end
   end
 
-The connection string takes the general form:
+The connection function takes the general form:
 
-  dbh = DBI.connect('DBI:SQLAnywhere:[DB_NAME]', [USER_NAME], [PASSWORD], [OPTIONS])
+  dbh = DBI.connect(DBNAME, [USER_NAME], [PASSWORD])
 
-where,
-  [DB_NAME] is the name of the database you wish to connect to
-  [USER_NAME] is the username
-  [PASSWORD] is the corresponding password for the username
+The DBNAME string can be specified in the following forms:
 
-  [OPTIONS] is a hash of additional options for the connection. 
+  "DBI:SQLAnywhere:"
+  "DBI:SQLAnywhere:{ENG}"
+  "DBI:SQLAnywhere:{ENG}:{DBN}"
+  "DBI:SQLAnywhere:{CONNECTION_STRING}"  # where CONNECTION_STRING ~= "key1=val1;key2=val2;..."
 
-For example, to start with named connection called 'ruby_dbi' you can use:
- 
-  dbh = DBI.connect('DBI:SQLAnywhere:Test', 'dba', 'sql', {:CON => "ruby_dbi"})
+For the first form, nothing will be added to the connection string. With the second and third forms
+the driver will add ENG and DBN to the connection string accordingly. The fourth form will pass
+the supplied connection string through unmolested.
+
+The USER_NAME and PASSWORD can be passed into the function and they will be automatically appended to the
+connection string. Since Ruby DBI will automatically fill in the username and password with defaults if they are omitted, 
+you should NEVER include a "UID=" or "PWD=" in your connection string or an exception will be thrown.
+
+Examples:  
+
+   Function Call                                              ==> Generated Connection String
+   ==============================================================================================
+   DBI.connect("DBI:SQLAnywhere:")                            ==>  "uid=dba;pwd=sql"
+   DBI.connect("DBI:SQLAnywhere:Demo")                        ==>  "eng=Demo;uid=dba;pwd=sql"
+   DBI.connect("DBI:SQLAnywhere:Demo:Test")                   ==>  "eng=Demo;dbn=Test;uid=dba;pwd=sql"
+   DBI.connect("DBI:SQLAnywhere:Demo:Test", 'john', 'doe')    ==>  "eng=Demo;dbn=Test;uid=john;pwd=doe"
+   DBI.connect("DBI:SQLAnywhere:eng=Demo;dbn=Test")           ==>  "eng=Demo;dbn=Test;uid=dba;pwd=sql"
+   DBI.connect("DBI:SQLAnywhere:eng=Demo;dbn=Test;uid=john")  ==>  EXCEPTION! UID cannot be specified in the connection string
+   DBI.connect("DBI:SQLAnywhere:CommLinks=tcpip(port=2638)")  ==>  "CommLinks=tcpip(port=2638);uid=dba;pwd=sql"
+
 
 ==Running Test Suite
 
