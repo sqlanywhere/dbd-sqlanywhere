@@ -86,7 +86,13 @@ module DBI::DBD::SQLAnywhere
             conn_str << "pwd=#{auth};"
          end 
 
-	 SA.instance.api.sqlany_connect(conn, conn_str)
+	 res = SA.instance.api.sqlany_connect(conn, conn_str)
+         if res == 0 then
+	    code, msg = SA.instance.api.sqlany_error(conn)
+	    state = SA.instance.api.sqlany_sqlstate(conn)
+	    raise DBI::DatabaseError.new(msg, code, state)
+         end
+
 	 return Database.new(conn, attr)      
       end
 
