@@ -1,6 +1,6 @@
 #====================================================
 #
-#    Copyright 2008-2010 iAnywhere Solutions, Inc.
+#    Copyright 2012 iAnywhere Solutions, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,16 +28,27 @@ module DBI::DBD::SQLAnywhere
 
 COLUMN_SELECT_STRING = <<END_OF_STATEMENT       
 SELECT SYS.SYSTABCOL.column_name,
-       SYS.SYSIDXCOL.sequence,
+       MIN (SYS.SYSIDXCOL.index_id) AS "index_id",
        SYS.SYSTABCOL."nulls",
        SYS.SYSTABCOL."default",
        SYS.SYSTABCOL.scale, 
        SYS.SYSTABCOL.width,
        SYS.SYSDOMAIN.type_id,
        SYS.SYSDOMAIN.domain_name,
-       SYS.SYSIDX."unique"
+       MIN (SYS.SYSIDX."unique") AS "unique",
+       SYS.SYSTABCOL.column_id
 FROM   (SYS.SYSTABLE join SYS.SYSTABCOL join SYS.SYSDOMAIN) left outer join (SYS.SYSIDXCOL join SYS.SYSIDX)
 WHERE  table_name = ?
+GROUP BY 
+       SYS.SYSTABCOL.column_name,
+       SYS.SYSTABCOL."nulls",
+       SYS.SYSTABCOL."default",
+       SYS.SYSTABCOL.scale, 
+       SYS.SYSTABCOL.width,
+       SYS.SYSDOMAIN.type_id,
+       SYS.SYSDOMAIN.domain_name,
+       SYS.SYSTABCOL.column_id
+ORDER BY SYS.SYSTABCOL.column_id
 END_OF_STATEMENT
 
 TABLE_SELECT_STRING = <<END_OF_STATEMENT       
@@ -190,7 +201,7 @@ END_OF_STATEMENT
 
 	    res, col_val = SA.instance.api.sqlany_get_column(prep_stmt, 1)
 	    raise error() if res == 0
-	    columns[col_count]['pkey'] = !col_val.nil?
+	    columns[col_count]['pkey'] = (col_val == 0)
 
 	    res, col_val = SA.instance.api.sqlany_get_column(prep_stmt, 2)
 	    raise error() if res == 0
