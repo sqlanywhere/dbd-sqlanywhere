@@ -119,8 +119,8 @@ if __FILE__ == $0
             end
 
             # base.rb is special, see DBD_TESTS
-            require "dbd/#{dbtype}/base.rb"
-            Dir["dbd/#{dbtype}/test*.rb"].each { |file| require file }
+            require "#{File.dirname(__FILE__)}/dbd/#{dbtype}/base.rb"
+            Dir["#{File.dirname(__FILE__)}/dbd/#{dbtype}/test*.rb"].each { |file| require file }
             # run the general tests
             DBDConfig.current_dbtype = dbtype.to_sym
             Dir["dbd/general/test*.rb"].each { |file| load file; @class.name = file; DBDConfig.suite << @class }

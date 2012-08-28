@@ -157,15 +157,6 @@
         end
     end
 
-    def test_duplicate_columns
-        assert_nothing_raised do
-            @sth = @dbh.prepare("select name, name from names where name = ?")
-            @sth.execute("Bob")
-            assert_equal [["Bob", "Bob"]], @sth.fetch_all
-            @sth.finish
-        end
-    end
-
     def test_rows
         @sth = nil
 
@@ -174,7 +165,7 @@
             @sth.execute("Bill", 22);
         end
 
-        assert 1, @sth.rows
+        assert 1, "#{@sth.rows}"
 
         @sth.finish
         @sth = nil
@@ -184,7 +175,7 @@
             @sth.execute("Bill");
         end
 
-        assert 1, @sth.rows
+        assert 1, "#{@sth.rows}"
 
         @sth.finish
 
