@@ -23,12 +23,12 @@
 #====================================================
 
 require 'rake/clean'
-require 'rake/rdoctask'
+require 'rdoc/task'
 require 'rubygems'
 require 'rubygems/builder'
 
 PACKAGE_NAME = "dbd-sqlanywhere"
-ARCH=Config::CONFIG['arch']
+ARCH=RbConfig::CONFIG['arch']
 
 pkg_version = ""
 
@@ -121,7 +121,7 @@ task :dist do |t|
    FileUtils.cp "#{PACKAGE_NAME}-#{pkg_version}.gem", "build"
 end
 
-Rake::RDocTask.new do |rd|
+RDoc::Task.new do |rd|
    rd.title = "SQL Anywhere DBD for Ruby-DBI"
    rd.main = "README"
    rd.rdoc_files.include('README', 'CHANGELOG', 'LICENSE', 'lib/**/*.rb')

@@ -154,9 +154,14 @@ module DBI::DBD::SQLAnywhere
 	       sql_type = SQLANY_NATIVE_TYPES[native_type]
 	       columns[cols]["sql_type"] = sql_type
 	       columns[cols]["type_name"] = DBI::SQL_TYPE_NAMES[sql_type]
-	       precision = max_size if precision == 0 and max_size != 0
-	       columns[cols]["precision"] = precision
-	       columns[cols]["scale"] = scale
+               if [ DBI::SQL_CHAR, DBI::SQL_VARCHAR,
+                    DBI::SQL_BINARY, DBI::SQL_VARBINARY ].include?(sql_type)
+                   precision = max_size
+               end
+               if precision != 0 or scale != 0
+                   columns[cols]["precision"] = precision
+                   columns[cols]["scale"] = scale
+               end
 	       columns[cols]["nullable"] = (nullable == 0)
 
 	       columns[cols]["dbi_type"] = DBI::Type::Boolean if sql_type == DBI::SQL_BIT
@@ -166,7 +171,7 @@ module DBI::DBD::SQLAnywhere
       end
 
       def rows
-	 if @handle.nil?
+	 if !@handle.nil?
 	    res = SA.instance.api.sqlany_affected_rows(@handle)
 	    raise error() if res == -1
 	    return res	 
@@ -204,7 +209,7 @@ module DBI::DBD::SQLAnywhere
 	    max_cols.times do |cols|
 	       res, col_val = SA.instance.api.sqlany_get_column(@handle, cols)
 	       raise error() if res == 0
-	       @arr[cols] = col_val
+	       @arr[cols] = ( col_val ? col_val.to_s : nil )
 	    end
 	 end
    end

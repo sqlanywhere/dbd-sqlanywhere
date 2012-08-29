@@ -1,5 +1,11 @@
 =CHANGE LOG
 
+=====1.0.0 -- 2012/08/29
+- Changed to have each row element to be stored as String object by "default" so that dbh.convert_types = false would return the String element properly.
+- Changed sth.column_info not to assign any value "precision" and "scale" for the datatype that does not specify the precision or length.
+- Changed sth.rows to return proper value for the number of the affected rows
+- Changed rakefile to use rdoc/task instead of rake/rdoctask(deprecated)
+
 =====0.1.2 -- 2009/03/27
 - Changed the order and type of parameter for connection
 
