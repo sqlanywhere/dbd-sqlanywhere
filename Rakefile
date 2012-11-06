@@ -41,8 +41,8 @@ end
 raise RuntimeError, "Could not determine current package version!" if pkg_version.empty?
 
 spec = Gem::Specification.new do |spec|
-  spec.authors = ["Eric Farrar"]
-  spec.email = 'eric.farrar@ianywhere.com'
+  spec.authors = ["SQL Anywhere"]
+  spec.email = 'sqlany_interfaces@sybase.com'
   spec.name = 'dbd-sqlanywhere'
   spec.summary = 'Ruby DBI driver (DBD) for SQL Anywhere'
   spec.description = <<-EOF

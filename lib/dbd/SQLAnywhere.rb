@@ -38,7 +38,7 @@ module DBI
 module DBD
 module SQLAnywhere
 
-   VERSION = "1.0.0"
+   VERSION = "1.0.1"
 
    def self.driver_name
       "SQLAnywhere"
@@ -81,12 +81,14 @@ module SQLAnywhere
 	   1
        when ::FalseClass
 	   0
+       when DBI::Timestamp
+	   DateTime.parse(obj.to_s).strftime("%Y/%m/%d %H:%M:%S.%6N")	
+       when ::DateTime
+	   obj.strftime("%Y/%m/%d %H:%M:%S.%6N")	
        when ::Time
-	   obj.strftime("%H:%M:%S")
+	   obj.strftime("%Y/%m/%d %H:%M:%S.%6N")
        when ::Date
 	   obj.strftime("%Y/%m/%d")
-       when ::DateTime, DBI::Timestamp
-	   DateTime.parse(obj.to_s).strftime("%Y/%m/%d %H:%M:%S")	
        when ::String
 	   obj
        when ::BigDecimal

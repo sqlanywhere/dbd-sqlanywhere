@@ -1,5 +1,8 @@
 =CHANGE LOG
 
+=====1.0.1 -- 2012/11/06
+- Changed to bind input for DateTime, Time properly(converting DateTime only used date
+part, converting Time discared the fractional part. This has been fixed)
 =====1.0.0 -- 2012/08/29
 - Changed to have each row element to be stored as String object by "default" so that dbh.convert_types = false would return the String element properly.
 - Changed sth.column_info not to assign any value "precision" and "scale" for the datatype that does not specify the precision or length.
